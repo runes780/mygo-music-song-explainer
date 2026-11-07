@@ -1,0 +1,11 @@
+{
+  "Song Explainer": "歌曲解读",
+  "API Key": "API 密钥",
+  "Your DeepSeek API key. For another OpenAI-compatible provider, use its key; a local provider may not need one.": "你的 DeepSeek API 密钥。使用其他 OpenAI 兼容服务时，请填写对应密钥；本地服务可能无需密钥。",
+  "Base URL": "接口地址",
+  "OpenAI-compatible API address. Leave empty for https://api.deepseek.com.": "OpenAI 兼容接口地址。留空则使用 https://api.deepseek.com。",
+  "Model": "模型",
+  "Leave empty for deepseek-flash, or enter another provider's model ID.": "留空则使用 deepseek-flash，或填写其他服务商的模型 ID。",
+  "Web Research": "联网研究",
+  "DeepSeek only: on by default. Set to off to skip Search API requests and their charges.": "仅适用于 DeepSeek：默认开启。设为 off 可跳过 Search API 请求及其费用。"
+}
