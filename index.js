@@ -1,12 +1,22 @@
 const DEFAULT_BASE_URL = "https://api.deepseek.com";
 const DEFAULT_MODEL = "deepseek-flash";
 const SEARCH_URL = "https://api.deepseek.com/v1/tools/search";
+const OUTPUT_LANGUAGES = {
+  en: "English",
+  "zh-CN": "Simplified Chinese",
+  ja: "Japanese",
+  fr: "French",
+  de: "German",
+  es: "Spanish",
+};
 
 function configuration() {
+  const language = host.setting("outputLanguage").trim();
   return {
     apiKey: host.setting("apiKey").trim(),
     baseURL: host.setting("baseURL").trim() || DEFAULT_BASE_URL,
     model: host.setting("model").trim() || DEFAULT_MODEL,
+    outputLanguage: OUTPUT_LANGUAGES[language] || language || "English",
     research: host.setting("webResearch").trim().toLowerCase() !== "off",
   };
 }
@@ -52,11 +62,12 @@ function short(text, length) {
 async function research(config, { track, lyric, question }) {
   if (!config.research || !deepSeek(config.baseURL)) return [];
   const artists = track.artists?.map((artist) => artist.name).join(" ") || "";
-  const topic = question || (lyric ? `lyrics meaning ${lyric}` : "origins genre creators composition story");
+  // Search in English for source coverage, while preserving names and lyrics.
+  const topic = lyric ? `lyrics meaning analysis ${lyric}` : question ? "background musical analysis" : "origins genre creators composition story";
   const query = short(`"${track.name}" "${artists}" ${topic}`, 128);
   const answer = await post(SEARCH_URL, config.apiKey, {
     query,
-    ori_question: short(question || `Explain ${track.name} by ${artists}`, 128),
+    ori_question: short(`Explain ${track.name} by ${artists}`, 128),
     count: 5,
     need_content: true,
   });
@@ -70,23 +81,26 @@ async function research(config, { track, lyric, question }) {
   }));
 }
 
-const SYSTEM_PROMPT = `You are a careful music guide inside a desktop music player.
-Explain the song, its origins, genres, creators, musical design and hidden stories as requested.
-Use the listener's language. Separate confirmed facts from interpretation. Never claim to have heard the audio.
-Do not invent precise BPM, key, meter, chords, release credits, quotations or source URLs. Omit what you cannot support.
-When research results are supplied, ground factual claims in them and do not cite pages absent from the results.
-For a lyric, explain meaning, references, wording and context without inventing the artist's intent.
-For a follow-up, answer the question directly while keeping the song in context.
+const SYSTEM_PROMPT = `You are a thoughtful music guide for curious listeners, not a critic writing for specialists. Your job is to help someone both understand a song and enjoy discovering it.
+A good answer combines two things: clear explanation and memorable detail. Explain the song's style, character and sound in accessible language, including what its genre or musical tradition actually means here. Bring the explanation to life with well-chosen origins, people, production details, lyrics, anecdotes or later influence when they add understanding or make the song more memorable. Facts and storytelling should reinforce each other, not read like a biography followed by trivia.
+Use the requested output language, preserving song titles, names and useful technical terms in their original form. Explain unfamiliar terms briefly when the reader needs them.
+
+There is no fixed outline. Decide for yourself what is most interesting and how best to tell it: a sound, a story, a contrast, a question, a lyric or a chain of details. Choose the length and structure that suit the song. Do not force a hidden story, a grand thesis, listening exercises or recommendations into every answer.
+Keep the reader oriented and curious. Avoid generic background, repeated metadata and reviewer-like displays of cleverness, but do not strip away the quirks and stories that make music interesting. Interpretation should help the listener notice something, not become confirmed artist intent.
+
+Dates, events, credits and production details need support from supplied research. Prefer primary interviews and high-quality sources, preserve the scope of quotations and paraphrases, and acknowledge unresolved conflicts briefly. Never claim to have heard or analyzed the audio, and never invent timestamps, BPM, key, meter, chords, equipment, techniques, quotations, source URLs or media URLs. When research is supplied, cite only those pages.
+For a lyric or follow-up, answer the question directly with the same blend of useful explanation and engaging detail.
+
 Return only a JSON object with this shape:
 {
   "title": "usually the song title",
-  "subtitle": "artist, album or release details when known",
-  "summary": "a concise but substantive introduction",
-  "genres": ["specific genre or musical tradition"],
-  "sections": [{"title": "section heading", "body": "plain text paragraphs", "items": ["optional listening suggestion"]}],
+  "subtitle": "useful artist, album or release context",
+  "summary": "a clear, engaging introduction to the song's character",
+  "genres": ["useful genres or musical traditions"],
+  "sections": [{"title": "what this part helps the listener discover", "body": "informative, engaging plain-text prose", "items": ["natural listening prompts or specific recommendations"]}],
   "sources": [{"title": "source title", "url": "source URL", "publisher": "site or publication"}]
 }
-Use plain text, not Markdown, inside strings. Give 3 to 5 useful sections for an overview, fewer for a focused question.`;
+Use plain text, not Markdown, inside strings. Richness is welcome when it adds understanding or makes the song more memorable.`;
 
 function normalizeExplanation(answer) {
   answer = answer && typeof answer === "object" ? answer : {};
@@ -198,7 +212,7 @@ function ready(config) {
 }
 
 function completionBody(config, request, sources, stream) {
-  const language = host.language() === "zh-CN" ? "Simplified Chinese" : "English";
+  const language = config.outputLanguage;
   return {
     model: config.model,
     stream,

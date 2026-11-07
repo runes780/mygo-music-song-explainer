@@ -23,6 +23,7 @@ The plugin uses **DeepSeek Flash** by default:
 - **API Key:** your DeepSeek API key.
 - **Base URL:** leave empty for `https://api.deepseek.com`.
 - **Model:** leave empty for `deepseek-flash`.
+- **Output Language:** a choice of English (the default), 简体中文, 日本語, Français, Deutsch or Español. Web research queries use English analysis topics while preserving names and original lyrics.
 - **Web Research:** on by default; set to `off` to skip DeepSeek Search API requests and their charges.
 
 To use another OpenAI-compatible provider, change the Base URL, Model and API Key. Local providers that accept the same API may not need a key.

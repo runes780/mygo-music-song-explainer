@@ -6,6 +6,8 @@
   "OpenAI-compatible API address. Leave empty for https://api.deepseek.com.": "OpenAI 兼容接口地址。留空则使用 https://api.deepseek.com。",
   "Model": "模型",
   "Leave empty for deepseek-flash, or enter another provider's model ID.": "留空则使用 deepseek-flash，或填写其他服务商的模型 ID。",
+  "Output Language": "输出语言",
+  "Default: English. Examples: 简体中文, 日本語, Français. Web research stays in English.": "默认 English。可填写简体中文、日本語、Français 等；联网检索仍使用英文。",
   "Web Research": "联网研究",
   "DeepSeek only: on by default. Set to off to skip Search API requests and their charges.": "仅适用于 DeepSeek：默认开启。设为 off 可跳过 Search API 请求及其费用。"
 }
